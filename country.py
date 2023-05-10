@@ -247,6 +247,7 @@ dictionary={"AF":"Afghanistan",
 "WF":"Wallis and Futuna",
 "YE":"Yemen",
 "ZM":"Zambia",
+"SAM":"South American Arabica",
 "ZW":"Zimbabwe"}
 
 
