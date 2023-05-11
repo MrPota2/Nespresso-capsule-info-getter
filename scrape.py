@@ -27,7 +27,7 @@ for url in urls:
     # initiating the webdriver. Parameter includes the path of the webdriver.
     driver_exe = './chromedriver'
     options = Options()
-    options.add_argument("--headless")
+    #options.add_argument("--headless")
     options.add_argument("disable-infobars")
     options.add_argument("--disable-extensions")
     options.add_argument(f'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
@@ -39,7 +39,7 @@ for url in urls:
     # this is just to ensure that the page is loaded
     print("Loading...")
     print(url)
-    time.sleep(3)
+    time.sleep(30)
 
     html = driver.page_source
     print("Loaded")
@@ -96,13 +96,13 @@ for url in urls:
 
         #Store in database    
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM Kapsel WHERE Navn = %s AND Teknologi = %s", (dic['title'], dic['technology']))
+        cursor.execute("SELECT * FROM Kapsel WHERE Navn = %s AND Teknologi = %s;", (dic['title'], dic['technology']))
         result = cursor.fetchall()
         
 
         if len(result) == 0:
             insert_cursor = db.cursor()
-            cursor.execute("INSERT INTO Kapsel (Teknologi, Rekke, Navn, Smak, Intensitet, Størrelse, Opphav) VALUES (%s, %s, %s, %s, %s, %s, %s)", (dic['technology'], dic['range'], dic['title'], dic['text'], dic['intensity'], dic['size'], dic['country']))
+            cursor.execute("INSERT INTO Kapsel (Teknologi, Rekke, Navn, Smak, Intensitet, Størrelse, Opphav) VALUES (%s, %s, %s, %s, %s, %s, %s);", (dic['technology'], dic['range'], dic['title'], dic['text'], dic['intensity'], dic['size'], dic['country']))
             db.commit()
             insert_cursor.close()
             print("Inserted")
