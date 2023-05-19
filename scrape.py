@@ -38,7 +38,6 @@ def open_url(url):
     Returns: soup
     """
     driver = uc.Chrome(headless=True, version_main=113)
-    error = []
     print('URL:',url)
 
     driver.get(url)
@@ -207,6 +206,30 @@ def main():
     """
     db = mysql.connector.connect(host='localhost', port=3306,
                             user='py', passwd='pswd', db='Nespresso')
+    
+    urls = get_urls()
+    for url in urls:
+        soup, driver = open_url(url)
+        technology = soup.find("h1", class_="product-header__title").get_text()
+        range_ = soup.find("div", class_="product-header__subtitle").get_text()
+        title = soup.find("h2", class_="product-header__name").get_text()
+        text = soup.find("div", class_="product-header__description").get_text()
+        intensity = soup.find("div", class_="product-header__intensity").get_text()
+        fluid = soup.find("div", class_="product-header__fluid").get_text()
+        desc = soup.find("div", class_="product-header__description").get_text()
+        size = size_check(fluid)
+        country = country_check(desc)
+        driver.close()
+        data = [technology, range_, title, text, intensity, size, country]
+        dic = assemble_data(data)
+        if exist_check(dic, db) == False:
+            insert(dic, db)
+        else:
+            update(dic, exist_check(dic, db)[1], db)
+        move(url)
 
     db.close()
+
+if __name__ == "__main__":
+    main()
 
