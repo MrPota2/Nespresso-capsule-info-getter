@@ -3,3 +3,5 @@ country.py
 *.log
 *.sql
 *.txt
+.vscode
+scrape copy.py

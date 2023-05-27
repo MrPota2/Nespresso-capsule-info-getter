@@ -53,7 +53,7 @@ def open_url(url):
 
 
 
-def find_data(query, driver):
+def find_data(query, soup):
     """
     Inform user of search query and return the result
 
@@ -63,10 +63,13 @@ def find_data(query, driver):
     Returns: soup result
     """
 
-    search = query
-    print("Searching for:", str(search))
+    print("Searching for:", str(query))
+    search = soup.find(query)
+    if search == None:
+        search = "Empty"
+    else:
+        search = search.get_text()
     print('Result:', search)
-    driver.close()
     print("\n\n")
     return search
 
@@ -112,7 +115,7 @@ def country_check(desc):
     print(country)
     return country
 
-def assemble_data(data):
+def assemble_data(raw, size, country):
     """
     Assemble data about the coffe into a dictionary
 
@@ -125,13 +128,12 @@ def assemble_data(data):
     it stays for now
     """
     
-    key = ('technology', 'range', 'title', 'text', 'intensity', 'size', 'country')
+    key = ('technology', 'range', 'title', 'text', 'intensity')
     dic={}
-    for i in range(len(key)):
-        if data[i] != "":
-            dic[key[i]] = data[i]
-        else:
-            dic[key[i]] = "Unknown"
+    for i in key:
+        dic[i]=raw[i]
+    dic['size'] = size
+    dic['country'] = country
     return dic
 
 def exist_check(dic, db):
@@ -151,7 +153,7 @@ def exist_check(dic, db):
     if existing_coffee == []:
         return False
     else:
-        return True, existing_coffee
+        return existing_coffee[0]
 
 def insert(dic, db):
     """
@@ -210,22 +212,29 @@ def main():
     urls = get_urls()
     for url in urls:
         soup, driver = open_url(url)
-        technology = soup.find("h1", class_="product-header__title").get_text()
-        range_ = soup.find("div", class_="product-header__subtitle").get_text()
-        title = soup.find("h2", class_="product-header__name").get_text()
-        text = soup.find("div", class_="product-header__description").get_text()
-        intensity = soup.find("div", class_="product-header__intensity").get_text()
-        fluid = soup.find("div", class_="product-header__fluid").get_text()
-        desc = soup.find("div", class_="product-header__description").get_text()
-        size = size_check(fluid)
-        country = country_check(desc)
+        technology = 'h1.product-header__title'
+        range_ = 'div.product-header__subtitle'
+        title = 'h2.product-header__name'
+        text = 'div.product-header__description'
+        intensity = 'div.product-header__intensity'
+        fluid = 'div.product-header__fluid'
+        desc = 'div.product-header__description'
+        querys = [technology, range_, title, text, intensity, fluid, desc]
+        
+        for i in querys:
+            raw[i] = find_data(i, soup)
+
         driver.close()
-        data = [technology, range_, title, text, intensity, size, country]
-        dic = assemble_data(data)
-        if exist_check(dic, db) == False:
+    
+        size = size_check(raw[fluid])
+        country = country_check(raw[desc])
+        
+        dic = assemble_data(raw, size, country)
+        ex_chk=exist_check(dic, db)
+        if ex_chk == False:
             insert(dic, db)
         else:
-            update(dic, exist_check(dic, db)[1], db)
+            update(dic, ex_chk, db)
         move(url)
 
     db.close()
